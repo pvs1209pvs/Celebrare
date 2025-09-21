@@ -12,9 +12,8 @@ import androidx.lifecycle.LifecycleOwner
 
 class MyCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
-
     data class TextData(
-        val userText: String = "Paramvir",
+        var userText: String? = null,
         var x: Float = 400f,
         var y: Float = 400f
     )
@@ -46,16 +45,29 @@ class MyCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
             invalidate()
         }
 
+        viewModel.canvasText.observe(lifecycleOwner) {
+            userText.userText = it
+            invalidate()
+        }
+
+
     }
 
-
     override fun onDraw(canvas: Canvas) {
+
         super.onDraw(canvas)
-        canvas.drawText(userText.userText, userText.x, userText.y, paint)
+
+        if (userText.userText != null) {
+            canvas.drawText(userText.userText!!, userText.x, userText.y, paint)
+
+        }
+
     }
 
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
+
+        if(userText.userText == null) return true
 
         when (event.action) {
 
@@ -65,6 +77,7 @@ class MyCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 val textBottom = paint.fontMetrics.descent
                 val textTop = paint.fontMetrics.ascent
 
+                // calculate if the user is clicking on the text present on the canvas
                 if (event.x >= userText.x && event.x <= userText.x + textWidth &&
                     event.y <= userText.y + textBottom && event.y >= userText.y + textTop
                 ) {
@@ -88,6 +101,7 @@ class MyCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
 
         return true
+
     }
 
 }

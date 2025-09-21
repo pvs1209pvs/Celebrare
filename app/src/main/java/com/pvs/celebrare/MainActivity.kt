@@ -9,6 +9,8 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.get
+import com.google.android.material.chip.ChipDrawable
 import com.pvs.celebrare.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -74,20 +76,47 @@ class MainActivity : AppCompatActivity() {
             viewModel.decreaseFontSize()
         }
 
-        binding.bold.setOnClickListener {
+
+        viewModel.textStyle.observe(this) {
+            binding.textView.text = it.fontSize.toInt().toString()
+        }
+
+        binding.boldChip.setOnClickListener {
             viewModel.toggleBold()
         }
 
-        binding.italic.setOnClickListener {
+        binding.italicsChip.setOnClickListener {
             viewModel.toggleItalic()
         }
 
-        binding.underline.setOnClickListener {
+        binding.underlinedChip.setOnClickListener {
             viewModel.toggleUnderline()
         }
 
-        viewModel.textStyle.observe(this) {
-            binding.textView.text = it.fontSize.toString()
+        binding.addText.setOnClickListener {
+            viewModel.addTextToCanvas("Paramvir")
+
+        }
+
+        viewModel.canvasText.observe(this){
+            if(it==null){
+                binding.chipGroup.isEnabled = false
+                binding.chipGroup[0].isEnabled = false
+                binding.chipGroup[1].isEnabled = false
+                binding.chipGroup[2].isEnabled = false
+                binding.spinner.isEnabled = false
+                binding.minus.isEnabled = false
+                binding.plus.isEnabled = false
+            }
+            else{
+                binding.chipGroup.isEnabled = true
+                binding.chipGroup[0].isEnabled = true
+                binding.chipGroup[1].isEnabled = true
+                binding.chipGroup[2].isEnabled = true
+                binding.spinner.isEnabled = true
+                binding.minus.isEnabled = true
+                binding.plus.isEnabled = true
+            }
         }
 
 

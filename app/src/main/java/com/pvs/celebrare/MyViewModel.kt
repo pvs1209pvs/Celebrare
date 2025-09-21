@@ -1,11 +1,15 @@
 package com.pvs.celebrare
 
 import android.graphics.Typeface
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import java.util.Stack
 
 class MyViewModel : ViewModel() {
+
+    private var _canvasText : MutableLiveData<String?> = MutableLiveData(null)
+    val canvasText : LiveData<String?> = _canvasText
 
     private val _textStyle = MutableLiveData(
         TextStyle(
@@ -16,13 +20,19 @@ class MyViewModel : ViewModel() {
             Typeface.DEFAULT
         )
     )
-    val textStyle = _textStyle
+    val textStyle : LiveData<TextStyle> = _textStyle
 
     private val _undo = Stack<TextStyle>()
     private val _redo = Stack<TextStyle>()
 
     private fun addToUndo() {
+        // do not save undo action if text is not present on the canvas yet
+        if(_canvasText.value == null) return
+
         _undo.push(_textStyle.value?.copy())
+
+        println("undo")
+        println(_undo.joinToString("\n","",""))
     }
 
     fun doUndo() {
@@ -31,9 +41,9 @@ class MyViewModel : ViewModel() {
 
         _redo.push(_undo.pop())
 
-        _textStyle.value =
-            if (_undo.isEmpty()) TextStyle(false, false, false, 64.0f, Typeface.DEFAULT)
-            else _undo.peek().copy()
+        if(_undo.isNotEmpty()){
+            _textStyle.value = _undo.peek().copy()
+        }
 
     }
 
@@ -60,36 +70,42 @@ class MyViewModel : ViewModel() {
             else -> Typeface.DEFAULT
         }
 
-        textStyle.value = textStyle.value?.copy(fontFamily = fontFamily)
+        _textStyle.value = _textStyle.value?.copy(fontFamily = fontFamily)
 
         addToUndo()
-
 
     }
 
     fun toggleBold() {
-        textStyle.value = textStyle.value?.copy(isBold = !_textStyle.value?.isBold!!)
+        _textStyle.value = _textStyle.value?.copy(isBold = !_textStyle.value?.isBold!!)
         addToUndo()
     }
 
     fun toggleUnderline() {
-        textStyle.value = textStyle.value?.copy(isUnderlined = !_textStyle.value?.isUnderlined!!)
+        _textStyle.value = _textStyle.value?.copy(isUnderlined = !_textStyle.value?.isUnderlined!!)
         addToUndo()
     }
 
     fun toggleItalic() {
-        textStyle.value = textStyle.value?.copy(isItalic = !_textStyle.value?.isItalic!!)
+        _textStyle.value = _textStyle.value?.copy(isItalic = !_textStyle.value?.isItalic!!)
         addToUndo()
     }
 
     fun increaseFontSize() {
-        textStyle.value = textStyle.value?.copy(fontSize = _textStyle.value?.fontSize!! + 8)
+        _textStyle.value = _textStyle.value?.copy(fontSize = _textStyle.value?.fontSize!! + 8)
         addToUndo()
     }
 
     fun decreaseFontSize() {
-        textStyle.value = textStyle.value?.copy(fontSize = _textStyle.value?.fontSize!! - 8)
+        val crntFontSize = _textStyle.value?.fontSize!!
+        if(crntFontSize == 8.0f) return // do not decrease the font size below 8
+        _textStyle.value = _textStyle.value?.copy(fontSize = crntFontSize - 8)
         addToUndo()
+    }
+
+    fun addTextToCanvas(s: String) {
+        _canvasText.value = s
+        addToUndo() // saves the initial text style
     }
 
 
