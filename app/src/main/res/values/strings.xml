@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Celebrare</string>
+
+    <string-array name="fonts_array">
+        <item>Sans-serif</item>
+        <item>Serif</item>
+        <item>Monospace</item>
+    </string-array>
+
+</resources>
