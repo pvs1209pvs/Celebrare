@@ -23,7 +23,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-//        enableEdgeToEdge()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -43,7 +42,6 @@ class MainActivity : AppCompatActivity() {
             binding.spinner.adapter = adapter
         }
 
-
         binding.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 
             override fun onItemSelected(
@@ -59,13 +57,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.myCanvas.attachViewModel(viewModel, this)
+        binding.myCanvas.onCanvasEvent = {
+            viewModel.addToUndo(it)
+        }
 
         binding.undo.setOnClickListener {
             viewModel.doUndo()
+            binding.myCanvas.invalidate()
         }
 
         binding.redo.setOnClickListener {
             viewModel.doRedo()
+            binding.myCanvas.invalidate()
         }
 
         binding.plus.setOnClickListener {
@@ -74,11 +77,6 @@ class MainActivity : AppCompatActivity() {
 
         binding.minus.setOnClickListener {
             viewModel.decreaseFontSize()
-        }
-
-
-        viewModel.textStyle.observe(this) {
-            binding.textView.text = it.fontSize.toInt().toString()
         }
 
         binding.boldChip.setOnClickListener {
@@ -95,10 +93,14 @@ class MainActivity : AppCompatActivity() {
 
         binding.addText.setOnClickListener {
             viewModel.addTextToCanvas("Paramvir")
-
         }
 
-        viewModel.canvasText.observe(this){
+        viewModel.textStyle.observe(this) {
+            if(it==null) binding.textView.text = 0.toString()
+            else binding.textView.text = it.fontSize.toInt().toString()
+        }
+
+        viewModel.textStyle.observe(this){
             if(it==null){
                 binding.chipGroup.isEnabled = false
                 binding.chipGroup[0].isEnabled = false
@@ -118,7 +120,6 @@ class MainActivity : AppCompatActivity() {
                 binding.plus.isEnabled = true
             }
         }
-
 
     }
 

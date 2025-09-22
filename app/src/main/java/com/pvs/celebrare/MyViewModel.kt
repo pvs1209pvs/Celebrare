@@ -8,31 +8,25 @@ import java.util.Stack
 
 class MyViewModel : ViewModel() {
 
-    private var _canvasText : MutableLiveData<String?> = MutableLiveData(null)
-    val canvasText : LiveData<String?> = _canvasText
 
-    private val _textStyle = MutableLiveData(
-        TextStyle(
-            false,
-            false,
-            false,
-            64.0f,
-            Typeface.DEFAULT
-        )
-    )
-    val textStyle : LiveData<TextStyle> = _textStyle
+
+    private val _textStyle : MutableLiveData<TextStyle?> = MutableLiveData(null)
+    val textStyle: LiveData<TextStyle?> = _textStyle
 
     private val _undo = Stack<TextStyle>()
     private val _redo = Stack<TextStyle>()
 
     private fun addToUndo() {
+
         // do not save undo action if text is not present on the canvas yet
-        if(_canvasText.value == null) return
+        if (_textStyle.value == null) return
 
         _undo.push(_textStyle.value?.copy())
 
-        println("undo")
-        println(_undo.joinToString("\n","",""))
+    }
+
+    fun addToUndo(ts: TextStyle){
+        _undo.push(ts)
     }
 
     fun doUndo() {
@@ -41,7 +35,7 @@ class MyViewModel : ViewModel() {
 
         _redo.push(_undo.pop())
 
-        if(_undo.isNotEmpty()){
+        if (_undo.isNotEmpty()) {
             _textStyle.value = _undo.peek().copy()
         }
 
@@ -58,7 +52,6 @@ class MyViewModel : ViewModel() {
         _textStyle.value = top.copy()
 
     }
-
 
     fun setFontFamily(font: String) {
 
@@ -98,13 +91,24 @@ class MyViewModel : ViewModel() {
 
     fun decreaseFontSize() {
         val crntFontSize = _textStyle.value?.fontSize!!
-        if(crntFontSize == 8.0f) return // do not decrease the font size below 8
+        if (crntFontSize == 8.0f) return // do not decrease the font size below 8
         _textStyle.value = _textStyle.value?.copy(fontSize = crntFontSize - 8)
         addToUndo()
     }
 
     fun addTextToCanvas(s: String) {
-        _canvasText.value = s
+
+        _textStyle.value = TextStyle(
+            s,
+            400f,
+            400f,
+            false,
+            false,
+            false,
+            64.0f,
+            Typeface.DEFAULT
+        )
+
         addToUndo() // saves the initial text style
     }
 

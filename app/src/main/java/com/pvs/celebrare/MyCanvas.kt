@@ -12,25 +12,23 @@ import androidx.lifecycle.LifecycleOwner
 
 class MyCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
-    data class TextData(
-        var userText: String? = null,
-        var x: Float = 400f,
-        var y: Float = 400f
-    )
-
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.BLACK
         textSize = 64f
         typeface = Typeface.SERIF
     }
 
-    private val userText = TextData()
-    private var selectedText: TextData? = null
+    private var userText: TextStyle? = null
+    private var selectedText: TextStyle? = null
 
 
     fun attachViewModel(viewModel: MyViewModel, lifecycleOwner: LifecycleOwner) {
 
         viewModel.textStyle.observe(lifecycleOwner) {
+
+            if (it == null) return@observe
+
+            userText = it
 
             val boldItalicStyle =
                 if (it.isBold && it.isItalic) Typeface.BOLD_ITALIC
@@ -45,41 +43,36 @@ class MyCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
             invalidate()
         }
 
-        viewModel.canvasText.observe(lifecycleOwner) {
-            userText.userText = it
-            invalidate()
-        }
-
-
     }
 
     override fun onDraw(canvas: Canvas) {
 
         super.onDraw(canvas)
 
-        if (userText.userText != null) {
-            canvas.drawText(userText.userText!!, userText.x, userText.y, paint)
+        if (userText == null) return
 
-        }
+        canvas.drawText(userText?.text.toString(), userText?.x!!, userText?.y!!, paint)
 
     }
+
+    var onCanvasEvent: ((textStyle: TextStyle) -> Unit)? = null
 
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
 
-        if(userText.userText == null) return true
+        if (userText == null) return true
 
         when (event.action) {
 
             MotionEvent.ACTION_DOWN -> {
 
-                val textWidth = paint.measureText(userText.userText)
+                val textWidth = paint.measureText(userText?.text)
                 val textBottom = paint.fontMetrics.descent
                 val textTop = paint.fontMetrics.ascent
 
                 // calculate if the user is clicking on the text present on the canvas
-                if (event.x >= userText.x && event.x <= userText.x + textWidth &&
-                    event.y <= userText.y + textBottom && event.y >= userText.y + textTop
+                if (event.x >= userText?.x!! && event.x <= userText?.x!! + textWidth &&
+                    event.y <= userText?.y!! + textBottom && event.y >= userText?.y!! + textTop
                 ) {
                     selectedText = userText
                 }
@@ -95,6 +88,9 @@ class MyCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
             }
 
             MotionEvent.ACTION_UP -> {
+                if (userText != null) {
+                    onCanvasEvent?.invoke(userText!!.copy())
+                }
                 selectedText = null
             }
 
