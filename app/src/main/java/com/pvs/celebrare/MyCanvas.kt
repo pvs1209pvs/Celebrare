@@ -18,17 +18,17 @@ class MyCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
         typeface = Typeface.SERIF
     }
 
-    private var userText: TextStyle? = null
-    private var selectedText: TextStyle? = null
+    private var userTextProp: TextProperties? = null
+    private var selectedTextProp: TextProperties? = null
 
 
     fun attachViewModel(viewModel: MyViewModel, lifecycleOwner: LifecycleOwner) {
 
-        viewModel.textStyle.observe(lifecycleOwner) {
+        viewModel.textProperties.observe(lifecycleOwner) {
 
             if (it == null) return@observe
 
-            userText = it
+            userTextProp = it
 
             val boldItalicStyle =
                 if (it.isBold && it.isItalic) Typeface.BOLD_ITALIC
@@ -49,38 +49,38 @@ class MyCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         super.onDraw(canvas)
 
-        if (userText == null) return
+        if (userTextProp == null) return
 
-        canvas.drawText(userText?.text.toString(), userText?.x!!, userText?.y!!, paint)
+        canvas.drawText(userTextProp?.text.toString(), userTextProp?.x!!, userTextProp?.y!!, paint)
 
     }
 
-    var onCanvasEvent: ((textStyle: TextStyle) -> Unit)? = null
+    var onCanvasEvent: ((textProperties: TextProperties) -> Unit)? = null
 
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
 
-        if (userText == null) return true
+        if (userTextProp == null) return true
 
         when (event.action) {
 
             MotionEvent.ACTION_DOWN -> {
 
-                val textWidth = paint.measureText(userText?.text)
+                val textWidth = paint.measureText(userTextProp?.text)
                 val textBottom = paint.fontMetrics.descent
                 val textTop = paint.fontMetrics.ascent
 
                 // calculate if the user is clicking on the text present on the canvas
-                if (event.x >= userText?.x!! && event.x <= userText?.x!! + textWidth &&
-                    event.y <= userText?.y!! + textBottom && event.y >= userText?.y!! + textTop
+                if (event.x >= userTextProp?.x!! && event.x <= userTextProp?.x!! + textWidth &&
+                    event.y <= userTextProp?.y!! + textBottom && event.y >= userTextProp?.y!! + textTop
                 ) {
-                    selectedText = userText
+                    selectedTextProp = userTextProp
                 }
 
             }
 
             MotionEvent.ACTION_MOVE -> {
-                selectedText?.let {
+                selectedTextProp?.let {
                     it.x = event.x
                     it.y = event.y
                     invalidate()
@@ -88,10 +88,10 @@ class MyCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
             }
 
             MotionEvent.ACTION_UP -> {
-                if (userText != null) {
-                    onCanvasEvent?.invoke(userText!!.copy())
+                if (userTextProp != null) {
+                    onCanvasEvent?.invoke(userTextProp!!.copy())
                 }
-                selectedText = null
+                selectedTextProp = null
             }
 
         }

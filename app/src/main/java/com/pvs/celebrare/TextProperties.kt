@@ -2,7 +2,7 @@ package com.pvs.celebrare
 
 import android.graphics.Typeface
 
-data class TextStyle(
+data class TextProperties(
     var text:String?,
     var x:Float,
     var y:Float,

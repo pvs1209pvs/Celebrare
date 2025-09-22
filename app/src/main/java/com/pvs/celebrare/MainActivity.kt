@@ -4,13 +4,11 @@ import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.get
-import com.google.android.material.chip.ChipDrawable
 import com.pvs.celebrare.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -95,12 +93,12 @@ class MainActivity : AppCompatActivity() {
             viewModel.addTextToCanvas("Paramvir")
         }
 
-        viewModel.textStyle.observe(this) {
+        viewModel.textProperties.observe(this) {
             if(it==null) binding.textView.text = 0.toString()
             else binding.textView.text = it.fontSize.toInt().toString()
         }
 
-        viewModel.textStyle.observe(this){
+        viewModel.textProperties.observe(this){
             if(it==null){
                 binding.chipGroup.isEnabled = false
                 binding.chipGroup[0].isEnabled = false
